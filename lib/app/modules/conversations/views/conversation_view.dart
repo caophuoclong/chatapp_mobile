@@ -1,0 +1,22 @@
+import 'package:flutter/material.dart';
+
+import 'package:get/get.dart';
+
+class ConversationView extends GetView {
+  const ConversationView({Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('ConversationView'),
+        centerTitle: true,
+      ),
+      body: Center(
+        child: Text(
+          'ConversationView is working',
+          style: TextStyle(fontSize: 20),
+        ),
+      ),
+    );
+  }
+}

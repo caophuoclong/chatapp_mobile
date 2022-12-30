@@ -1,0 +1,12 @@
+{
+    "_id": "",
+    "name": "",
+    "username": "",
+    "email": "",
+    "phone": "",
+    "avatarUrl": "",
+    "birthday":"",
+    "lastOnline":0,
+    "gender": "male",
+    "active": "true"
+}

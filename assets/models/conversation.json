@@ -1,0 +1,20 @@
+{
+    "_id": "",
+    "name": "",
+    "type": "",
+    "visible": false,
+    "avatarUrl": "",
+    "isBlocked": false,
+    "isDeleted": false,
+    "deletedAt": "",
+    "createdAt": "",
+    "updatedAt": "",
+    "owner": null,
+    "blockBy": null,
+    "lastMessage": "",
+    "friendShip": "",
+    "participants": [
+        ""
+    ]
+
+}

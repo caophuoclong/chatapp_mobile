@@ -1,3 +1,4 @@
+import 'package:bebes/app/constants/app_theme.dart';
 import 'package:bebes/app/modules/chat/bindings/chat_binding.dart';
 import 'package:bebes/app/modules/chat/views/chat_view.dart';
 import 'package:bebes/app/modules/contact/bindings/contact_binding.dart';
@@ -10,6 +11,7 @@ import 'package:bebes/app/modules/settings/bindings/settings_binding.dart';
 import 'package:bebes/app/modules/settings/controllers/settings_controller.dart';
 import 'package:bebes/app/modules/settings/views/settings_view.dart';
 import 'package:bebes/app/modules/user/bindings/user_binding.dart';
+import 'package:flutter_swipe_detector/flutter_swipe_detector.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:bebes/app/modules/user/views/user_view.dart';
@@ -23,46 +25,72 @@ import '../controllers/home_controller.dart';
 class HomeView extends GetView<HomeController> {
   HomeView({Key? key}) : super(key: key);
   final SettingsController sc = Get.find();
-  Widget showActions(BuildContext context) {
-    int tabIndex = controller.tabIndex.value;
+
+  List<Widget> showActions(BuildContext context) {
+    final tabIndex = controller.tabIndex.value;
     switch (tabIndex) {
       case 1:
-        return IconButton(
-            onPressed: controller.gotoSettingsPage,
-            icon: const Icon(Icons.person_add));
+        return [
+          IconButton(
+              onPressed: controller.gotoSettingsPage,
+              icon: const Icon(Icons.person_add))
+        ];
       case 2:
-        return IconButton(
-            onPressed: controller.gotoSettingsPage,
-            icon: const Icon(Icons.settings));
+        return [
+          IconButton(
+              onPressed: controller.gotoSettingsPage,
+              icon: const Icon(Icons.settings))
+        ];
       default:
-        return IconButton(
-            onPressed: controller.gotoSettingsPage,
-            icon: const Icon(Icons.telegram_sharp));
+        return [
+          IconButton(
+              onPressed: controller.changeTheme,
+              icon: sc.isLightTheme.value
+                  ? const Icon(Icons.light_mode)
+                  : const Icon(Icons.dark_mode)),
+          IconButton(
+              onPressed: controller.goToSearchPage,
+              icon: const Icon(Icons.search)),
+        ];
+    }
+  }
+
+  Widget _renderTitle() {
+    final tabIndex = controller.tabIndex.value;
+    switch (tabIndex) {
+      case 0:
+        return const Text("Home");
+      case 1:
+        return const Text("Contacts");
+      case 2:
+        return const Text("User");
+      default:
+        return const Text("Conversations");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: GestureDetector(
-          onTap: controller.goToSearchPage,
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            child: Row(
-              children: const [
-                Icon(Icons.search),
-                SizedBox(
-                  width: 4,
-                ),
-                Text("Search something...")
-              ],
+      appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: Obx(
+            () => AppBar(
+              backgroundColor: MyTheme.getAppBarColor(
+                  sc.isLightTheme.value)["backgroundColor"],
+              shadowColor:
+                  MyTheme.getAppBarColor(sc.isLightTheme.value)["shadowColor"],
+              foregroundColor: MyTheme.getAppBarColor(
+                  sc.isLightTheme.value)["foregroundColor"],
+              leading: const Icon(Icons.menu),
+              title: _renderTitle(),
+              actions: showActions(context),
             ),
-          ),
-        ),
-        actions: [Obx(() => showActions(context))],
-      ),
-      body: Obx(() => IndexedStack(
+          )),
+      body: Obx(() => SwipeDetector(
+          onSwipeLeft: controller.onSwipeLeft,
+          onSwipeRight: controller.onSwipeRight,
+          child: IndexedStack(
             index: controller.tabIndex.value,
             children: [
               Navigator(
@@ -76,12 +104,12 @@ class HomeView extends GetView<HomeController> {
                   } else if (settings.name == Routes.SEARCH) {
                     return GetPageRoute(
                         routeName: Routes.SEARCH,
-                        page: () => const SearchView(),
+                        page: () => SearchView(),
                         binding: SearchBinding());
                   } else if (settings.name == Routes.CHAT) {
                     return GetPageRoute(
                         routeName: Routes.CHAT,
-                        page: () => const ChatView(),
+                        page: () => ChatView(),
                         binding: ChatBinding());
                   }
                 },
@@ -95,12 +123,6 @@ class HomeView extends GetView<HomeController> {
                         page: () => const ContactView(),
                         binding: ContactBinding());
                   }
-                  // else if (settings.name == Routes.USER) {
-                  //   return GetPageRoute(
-                  //       routeName: Routes.USER,
-                  //       page: () => const UserView(),
-                  //       binding: UserBinding());
-                  // }
                 },
               ),
               Navigator(
@@ -109,34 +131,35 @@ class HomeView extends GetView<HomeController> {
                   if (settings.name == Routes.USER) {
                     return GetPageRoute(
                         routeName: Routes.USER,
-                        page: ()=> UserView(),
-                        binding: UserBinding()
-                    );
+                        page: () => UserView(),
+                        binding: UserBinding());
                   } else if (settings.name == Routes.SETTINGS) {
                     return GetPageRoute(
                         routeName: Routes.SETTINGS,
-                        page: () => const SettingsView(),
+                        page: () => SettingsView(),
                         binding: SettingsBinding());
                   }
                 },
               )
             ],
-          )),
-      bottomNavigationBar: Obx(() => BottomNavigationBar(
-            currentIndex: controller.tabIndex.value,
-            showUnselectedLabels: false,
-            showSelectedLabels: false,
-            items: const [
-              BottomNavigationBarItem(
-                  icon: FaIcon(FontAwesomeIcons.house), label: "Home"),
-              BottomNavigationBarItem(
-                  icon: FaIcon(FontAwesomeIcons.solidAddressBook),
-                  label: "Contact"),
-              BottomNavigationBarItem(
-                  icon: FaIcon(FontAwesomeIcons.solidUser), label: "User"),
-            ],
-            onTap: controller.onTabClick,
-          )),
+          ))),
+      // bottomNavigationBar: Obx(() => BottomNavigationBar(
+      //       currentIndex: controller.tabIndex.value,
+      //       showUnselectedLabels: false,
+      //       showSelectedLabels: false,
+      //       unselectedItemColor: Colors.grey,
+      //       selectedItemColor: Colors.red,
+      //       items: const [
+      //         BottomNavigationBarItem(
+      //             icon: FaIcon(FontAwesomeIcons.house), label: "Home"),
+      //         BottomNavigationBarItem(
+      //             icon: FaIcon(FontAwesomeIcons.solidAddressBook),
+      //             label: "Contact"),
+      //         BottomNavigationBarItem(
+      //             icon: FaIcon(FontAwesomeIcons.solidUser), label: "User"),
+      //       ],
+      //       onTap: controller.onTabClick,
+      //     )),
     );
   }
 }

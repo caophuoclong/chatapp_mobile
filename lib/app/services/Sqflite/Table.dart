@@ -3,13 +3,19 @@
 import 'package:bebes/app/services/Sqflite/abstracts/table.abstract.dart';
 import 'package:bebes/app/services/Sqflite/abstracts/table_field.abstract.dart';
 import 'package:bebes/app/services/Sqflite/database.dart';
-import 'package:bebes/app/services/Sqflite/generateField.dart';
 import 'package:bebes/app/services/Sqflite/interfaces/database.interface.dart';
+import 'package:bebes/app/services/Sqflite/types/filed.type.dart';
+import 'package:bebes/app/services/Sqflite/types/primarykey.type.dart';
 import 'package:bebes/app/services/Sqflite/types/relationship.type.dart';
 import 'package:sqflite/sqlite_api.dart';
+import 'package:uuid/uuid.dart';
 
 class BebesTable<T> extends Table implements IDatabase {
+  static const uuid = Uuid();
+
   Future<Database> db;
+  @override
+  final dynamic defaultPrimaryKeyValue;
   @override
   final String tableName;
   @override
@@ -23,9 +29,8 @@ class BebesTable<T> extends Table implements IDatabase {
   final Map<String, Map<String, dynamic>> related;
 
   BebesTable(this.tableName, this.primaryKey, this.primaryKeyType, this.fields,
-      {this.related = const {}})
+      {this.related = const {}, this.defaultPrimaryKeyValue})
       : db = BebesDatabase("bebes").db {
-    print("init db");
     db.then((result) async {
       if (related.isNotEmpty) {
         await result.execute(_generateQueryWithRelated());
@@ -110,27 +115,118 @@ class BebesTable<T> extends Table implements IDatabase {
     });
   }
 
-  @override
-  get(Map<String, dynamic> where, {select = "*"}) async {
-    // TODO: implement get
+  _getData(Map<String, dynamic> where,
+      {select = "*", relations, limit = 1}) async {
+    // bool withJoin = false;
+    // if (select.runtimeType == List) {
+    //   select = select.join(",");
+    // }
+    // if (relations.runtimeType != String) {
+    //   throw Exception("Relations must be an array");
+    // }
+
+    // if (!RegExp(r"^\w+(\s*,\s*\w+)*$").hasMatch(relations)) {
+    //   throw Exception("Relations does not match with regex");
+    // }
+    // final relationsList = relations.split(",").map((value) {
+    //   if (related[value.trim()] == null) {
+    //     throw Exception("Relation $value not found");
+    //   }
+    //   switch (related[value.trim()]!["type"]) {
+    //     case RelationShipType.manyToMany:
+    //       return "";
+    //   }
+    // });
     String query = '''
-    SELECT $select FROM $tableName WHERE ${where.keys.map((key) => "$key = ${where[key]}").join(" AND ")} LIMIT 1;
+    SELECT $select 
+    FROM $tableName 
+    WHERE ${where.keys.map((key) => "$key = ${where[key]}").join(" AND ")} 
+    LIMIT $limit;
     ''';
-    return (await (await db).execute(query)) as T;
+    return (await (await db).execute(query));
+  }
+
+  /// This a function to get data from database
+  ///
+  /// @param where is a map of key and value
+  ///
+  /// @param select is a string or list of string
+  ///
+  /// @param relations is a string
+  ///
+  /// Example:
+  ///
+  /// get({"id": 1}, select: ["id", "name"], relations: "user, post")
+  @override
+  get(Map<String, dynamic> where, {select = "*", relations}) async {
+    if (select.runtimeType == List) {
+      select = select.join(",");
+    }
+    if (relations.runtimeType != String) {
+      throw Exception("Relations must be an array");
+    }
+    if (!RegExp(r"^\w+(\s*,\s*\w+)*$").hasMatch(relations)) {
+      throw Exception("Relations does not match with regex");
+    }
+    return _getData(where, select: select, relations: relations, limit: 1);
+  }
+
+  /// This a function to get data from database
+  /// @param where is a map of key and value
+  /// @param select is a string or list of string
+  /// @param relations is a string
+  /// Example:
+  /// get({"id": 1}, select: ["id", "name"], relations: "user, post")
+  @override
+  Future<List<T>> getMany(Map<String, dynamic> where,
+      {select = "*", relations}) async {
+    if (select.runtimeType == List) {
+      select = select.join(",");
+    }
+    if (relations.runtimeType != String) {
+      throw Exception("Relations must be an array");
+    }
+    if (!RegExp(r"^\w+(\s*,\s*\w+)*$").hasMatch(relations)) {
+      throw Exception("Relations does not match with regex");
+    }
+    return _getData(where, select: select, relations: relations, limit: 1);
+  }
+
+  _defaultValue() {
+    if (primaryKeyType == PrimaryKeyType.uuid &&
+        defaultPrimaryKeyValue == null) {
+      return BebesTable.uuid.v4();
+    } else {
+      throw Exception("Primary key value not found");
+    }
   }
 
   @override
-  Future<List<T>> getMany(Map<String, dynamic> where, {select = "*"}) async {
-    String query = '''
-    SELECT $select FROM $tableName WHERE ${where.keys.map((key) => "$key = ${where[key]}").join(" AND ")};
+  insert(Map<String, dynamic> model) async {
+    String query;
+    if (primaryKeyType == PrimaryKeyType.intAutoIncrement) {
+      query = '''
+    INSERT INTO $tableName (${fields.map((field) => field.type == FieldType.datetimeAuto ? "" : field.name).join(",")}) VALUES (${fields.map((field) => field.type == FieldType.datetimeAuto ? "" : "'${model[field.name]}'").join(",")});
     ''';
-    return (await db).execute(query) as List<T>;
+    } else {
+      final String defaultPrimaryKey = _defaultValue();
+      query = '''
+    INSERT INTO $tableName ($primaryKey,${fields.map((field) => field.type == FieldType.datetimeAuto ? "" : field.name).join(",")}) VALUES ('$defaultPrimaryKey',${fields.map((field) => field.type == FieldType.datetimeAuto ? "" : "'${model[field.name]}'").join(",")});
+    ''';
+    }
+    return (await db).execute(query);
   }
 
   @override
-  insert() {}
-  @override
-  update() {}
+  update(Map<String, dynamic> model) {
+    String query = '''
+  UPDATE $tableName
+  SET ${model.map((key, value) => MapEntry(key, "$key = '$value'")).values.join(",")}
+  WHERE $primaryKey = '${model[primaryKey]}';
+  ''';
+    return db.then((value) => value.execute(query));
+  }
+
   @override
   delete() {}
 }

@@ -30,12 +30,12 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.SETTINGS,
-      page: () => const SettingsView(),
+      page: () => SettingsView(),
       binding: SettingsBinding(),
     ),
     GetPage(
       name: _Paths.SEARCH,
-      page: () => const SearchView(),
+      page: () => SearchView(),
       binding: SearchBinding(),
     ),
     GetPage(
@@ -48,7 +48,6 @@ class AppPages {
       page: () => const ContactView(),
       binding: ContactBinding(),
     ),
-
     GetPage(
       name: _Paths.CONVERSATIONS,
       page: () => ConversationsView(),
@@ -56,7 +55,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.CHAT,
-      page: () => const ChatView(),
+      page: () => ChatView(),
       binding: ChatBinding(),
     ),
   ];

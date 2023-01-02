@@ -4,13 +4,15 @@ abstract class Table<T> {
   late String tableName;
   late String primaryKey;
   late String primaryKeyType;
+  late dynamic defaultPrimaryKeyValue;
   late List<TableField> fields;
   /*
    *Example:
    *  {
-   *  "tableName":{
+   *  "relationName":{
    *  localKeyType: PrimaryKeyType,
    *  foreignKey: "conversation_id",
+   * table: "conversation"
    *  localKey: "_id"
    *  customField: {
    * name: {

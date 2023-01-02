@@ -1,6 +1,6 @@
 import 'package:bebes/app/services/Sqflite/types/filed.type.dart';
 
-class PriamryKeyType {
+class PrimaryKeyType {
   static const String intAutoIncrement =
       "${FieldType.int} NOT NULL auto_increment";
   static const String int = "${FieldType.int} NOT NULL";

@@ -13,7 +13,7 @@ class ContactProvider extends GetConnect {
       : _contactTable = BebesTable(
             "friendShip",
             "_id",
-            PriamryKeyType.uuid,
+            PrimaryKeyType.uuid,
             GenerateField.generate({
               "userRequest": {
                 "type": FieldType.uuid,

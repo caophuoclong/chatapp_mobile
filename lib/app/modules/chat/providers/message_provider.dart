@@ -14,7 +14,7 @@ class MessageProvider extends GetConnect {
       : table = BebesTable(
             "message",
             "_id",
-            PriamryKeyType.uuid,
+            PrimaryKeyType.uuid,
             GenerateField.generate({
               "content": {"type": FieldType.longtext},
               "status": {

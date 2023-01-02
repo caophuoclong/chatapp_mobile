@@ -1,3 +1,4 @@
+import 'package:bebes/app/constants/app_theme.dart';
 import 'package:bebes/app/modules/home/controllers/home_controller.dart';
 import 'package:bebes/app/modules/settings/controllers/settings_controller.dart';
 import 'package:flutter/material.dart';
@@ -29,8 +30,8 @@ class ChangeThemeView extends GetView<SettingsController> {
               return Container(
                 decoration: BoxDecoration(
                     color: controller.isLightTheme.value
-                        ? Colors.white
-                        : Colors.blueGrey,
+                        ? MyTheme.lightSecondaryColor
+                        : MyTheme.darkSecondaryColor,
                     borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(20),
                         topRight: Radius.circular(20))),

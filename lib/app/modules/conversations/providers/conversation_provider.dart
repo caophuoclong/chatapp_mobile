@@ -1,5 +1,4 @@
 import 'package:bebes/app/services/Sqflite/Table.dart';
-import 'package:bebes/app/services/Sqflite/TableField.dart';
 import 'package:bebes/app/services/Sqflite/generateField.dart';
 import 'package:bebes/app/services/Sqflite/types/filed.type.dart';
 import 'package:bebes/app/services/Sqflite/types/primarykey.type.dart';
@@ -14,7 +13,7 @@ class ConversationProvider extends GetConnect {
       : _conversationTable = BebesTable(
             "conversation",
             '_id',
-            PriamryKeyType.uuid,
+            PrimaryKeyType.uuid,
             GenerateField.generate({
               "name": {
                 "type": FieldType.string,
@@ -60,19 +59,19 @@ class ConversationProvider extends GetConnect {
             related: {
               "owner": {
                 "table": "user",
-                "localKeyType": PriamryKeyType.uuid,
+                "localKeyType": PrimaryKeyType.uuid,
                 "localKey": "_id",
                 "type": RelationShipType.oneToOne
               },
               "friendShip": {
                 "table": "friendShip",
-                "localKeyType": PriamryKeyType.uuid,
+                "localKeyType": PrimaryKeyType.uuid,
                 "localKey": "_id",
                 "type": RelationShipType.oneToOne
               },
               "members": {
                 "table": "user",
-                "localKeyType": PriamryKeyType.uuid,
+                "localKeyType": PrimaryKeyType.uuid,
                 "localKey": "_id",
                 "type": RelationShipType.manyToMany,
                 "customField": {

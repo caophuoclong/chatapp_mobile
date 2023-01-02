@@ -9,6 +9,7 @@ class FieldType {
   static const String double = "double";
   static const String date = "date";
   static const String datetime = "datetime";
+  static const String datetimeAuto = "datetime DEFAULT CURRENT_TIMESTAMP";
   static const String time = "time";
   static const String timestamp = "timestamp";
   static const String blob = "blob";

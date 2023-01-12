@@ -57,9 +57,12 @@ class MessageProvider extends GetConnect {
     httpClient.baseUrl = 'YOUR-API-URL';
   }
 
-  Future<Message?> getMessage(int id) async {
-    final response = await get('message/$id');
-    return response.body;
+  Future<List<Message>?> getMessages(String destination,
+      {limit = 20, skip = 0}) async {
+    final response = await table
+        .getMany({"destination": destination}, limit: limit, skip: skip);
+    // print("Response getMessage $response");
+    return [];
   }
 
   Future<Response<Message>> postMessage(Message message) async =>

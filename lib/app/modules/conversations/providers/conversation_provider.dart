@@ -1,4 +1,7 @@
+import 'package:bebes/app/modules/user/user_model.dart';
 import 'package:bebes/app/services/Sqflite/Table.dart';
+import 'package:bebes/app/services/Sqflite/entities/member.dart';
+import 'package:bebes/app/services/Sqflite/entities/user.dart';
 import 'package:bebes/app/services/Sqflite/generateField.dart';
 import 'package:bebes/app/services/Sqflite/types/filed.type.dart';
 import 'package:bebes/app/services/Sqflite/types/primarykey.type.dart';
@@ -15,6 +18,10 @@ class ConversationProvider extends GetConnect {
             '_id',
             PrimaryKeyType.uuid,
             GenerateField.generate({
+              "avatarUrl": {
+                "type": FieldType.string,
+                "defaultValue": "",
+              },
               "name": {
                 "type": FieldType.string,
                 "defaultValue": "",
@@ -23,11 +30,12 @@ class ConversationProvider extends GetConnect {
                 "type": FieldType.string,
                 "defaultValue": "",
               },
-              "created_at": {
+              "visible": {"type": FieldType.boolean, "defaultValue": false},
+              "createdAt": {
                 "type": FieldType.datetime,
                 "defaultValue": DateTime.now().toString(),
               },
-              "updated_at": {
+              "updatedAt": {
                 "type": FieldType.datetime,
                 "defaultValue": DateTime.now().toString(),
               },
@@ -39,16 +47,8 @@ class ConversationProvider extends GetConnect {
                 "type": FieldType.boolean,
                 "defaultValue": false,
               },
-              "isDeleted": {
-                "type": FieldType.boolean,
-                "defaultValue": false,
-              },
-              "blockBy": {
-                "type": FieldType.uuid,
-                "defaultValue": "",
-              },
               "lastMessage": {
-                "type": FieldType.string,
+                "type": FieldType.uuid,
                 "defaultValue": "",
               },
               "friendShip": {
@@ -69,25 +69,31 @@ class ConversationProvider extends GetConnect {
                 "localKey": "_id",
                 "type": RelationShipType.oneToOne
               },
+              "lastMessage": {
+                "table": "message",
+                "localKeyType": PrimaryKeyType.uuid,
+                "localKey": "_id",
+                "type": RelationShipType.oneToMany
+              },
               "members": {
                 "table": "user",
                 "localKeyType": PrimaryKeyType.uuid,
                 "localKey": "_id",
                 "type": RelationShipType.manyToMany,
-                "customField": {
-                  "tableName": "members",
-                  "fields": GenerateField.generate({
-                    "createdAt": {
-                      "type": FieldType.datetime,
-                    },
-                    "updatedAt": {
-                      "type": FieldType.datetime,
-                    },
-                    "isDeleted": {
-                      "type": FieldType.boolean,
-                    }
-                  })
-                }
+                // "customField": {
+                //   "tableName": "members",
+                //   "fields": GenerateField.generate({
+                //     "createdAt": {
+                //       "type": FieldType.datetime,
+                //     },
+                //     "updatedAt": {
+                //       "type": FieldType.datetime,
+                //     },
+                //     "isDeleted": {
+                //       "type": FieldType.boolean,
+                //     }
+                //   })
+                // }
               }
             });
   BebesTable<Conversation> get table => _conversationTable;
@@ -101,6 +107,54 @@ class ConversationProvider extends GetConnect {
       }
     };
     httpClient.baseUrl = 'YOUR-API-URL';
+  }
+
+  Future<List<User>> _getMembersPerConversation(String conversationId) async {
+    final memberIds = await memberTable
+        .getMany({"conversation_id": conversationId}, select: "user_id");
+    final List<User> members = [];
+    for (var memberId in memberIds) {
+      final member = await userTable.get({"_id": memberId["user_id"]});
+      if (member.isNotEmpty) {
+        final mem = User.fromJson(member[0]);
+        members.add(mem);
+      }
+    }
+    return members;
+  }
+
+  Future<List<Conversation>> getConversations() async {
+    final myId = await memberTable.myId;
+    final response =
+        await memberTable.getMany({"user_id": myId}, select: "conversation_id");
+    List<Conversation> conversationsList = [];
+    for (var con in response) {
+      final conversationId = con["conversation_id"];
+      Map<String, dynamic> conversation =
+          (await table.get({"_id": conversationId}))[0];
+      final members = await _getMembersPerConversation(conversationId);
+      print(conversation);
+      // print(conversation["type"] == "direct");
+      final xxx = {
+        ...conversation,
+        "name": conversation["name"] == "null" &&
+                conversation["type"] == "direct"
+            ? members
+                .firstWhereOrNull((element) => element.toJson()["_id"] != myId)
+                ?.name
+            : "98989",
+        "avatarUrl": conversation["avatarUrl"] == "null" &&
+                conversation["type"] == "direct"
+            ? members
+                .firstWhereOrNull((element) => element.toJson()["_id"] != myId)
+                ?.avatarUrl
+            : conversation["avatarUrl"],
+        "members": members
+      };
+      final conx = Conversation.fromJson(xxx);
+      conversationsList.add(conx);
+    }
+    return conversationsList;
   }
 
   Future<Conversation?> getConversation(int id) async {

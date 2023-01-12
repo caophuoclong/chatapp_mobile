@@ -1,3 +1,4 @@
+import 'package:bebes/app/modules/login/controllers/auth_controller_controller.dart';
 import 'package:get/get.dart';
 
 import '../modules/chat/bindings/chat_binding.dart';
@@ -8,6 +9,8 @@ import '../modules/conversations/bindings/conversations_binding.dart';
 import '../modules/conversations/views/conversations_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
+import '../modules/login/bindings/login_binding.dart';
+import '../modules/login/views/login_view.dart';
 import '../modules/search/bindings/search_binding.dart';
 import '../modules/search/views/search_view.dart';
 import '../modules/settings/bindings/settings_binding.dart';
@@ -19,7 +22,6 @@ part 'app_routes.dart';
 
 class AppPages {
   AppPages._();
-
   static const initial = Routes.HOME;
 
   static final routes = [
@@ -57,6 +59,11 @@ class AppPages {
       name: _Paths.CHAT,
       page: () => ChatView(),
       binding: ChatBinding(),
+    ),
+    GetPage(
+      name: _Paths.LOGIN,
+      page: () => LoginView(),
+      binding: LoginBinding(),
     ),
   ];
 }

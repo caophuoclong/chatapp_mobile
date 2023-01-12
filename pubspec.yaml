@@ -18,11 +18,24 @@ dependencies:
   path: any
   uuid: any
   flutter_swipe_detector: any
+  flutter_login: any
+  http: any
+  envify: any
+  http_interceptor: any
+  dio: any
+  dio_cookie_manager: any
+  cookie_jar: any
+  connectivity_plus: any
+  graphql_flutter: any
 
 dev_dependencies:
   flutter_lints: 2.0.1
   flutter_test:
     sdk: flutter
+  envify_generator: any
+  build_runner: any
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/

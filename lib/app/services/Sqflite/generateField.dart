@@ -5,8 +5,13 @@ class GenerateField {
   static List<TableField> generate(Map<String, dynamic> fields) {
     List<TableField> result = [];
     fields.forEach((key, value) {
-      result.add(Field(key, value["type"], value["defaultValue"],
-          isNull: value["isNull"] == true ? true : false));
+      result.add(Field(
+        key,
+        value["type"],
+        value["defaultValue"],
+        notNull: value["notNull"] == true ? false : true,
+        isUnique: value["isUnique"] == true ? true : false,
+      ));
     });
     return result;
   }

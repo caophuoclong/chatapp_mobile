@@ -4,6 +4,8 @@ class Field extends TableField {
   final String name;
   final String type;
   final dynamic defaultValue;
-  final bool isNull;
-  Field(this.name, this.type, this.defaultValue, {this.isNull = false});
+  final bool notNull;
+  final bool isUnique;
+  Field(this.name, this.type, this.defaultValue,
+      {this.notNull = true, this.isUnique = false});
 }

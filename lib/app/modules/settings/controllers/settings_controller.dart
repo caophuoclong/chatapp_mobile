@@ -28,6 +28,7 @@ class SettingsController extends GetxController {
   }
 
   changeTheme(bool value) {
+    print("value2 $value");
     isLightTheme.value = value;
     Get.changeThemeMode(value ? ThemeMode.light : ThemeMode.dark);
     _saveThemeStatus(value);

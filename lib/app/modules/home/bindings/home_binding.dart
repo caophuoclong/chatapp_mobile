@@ -1,3 +1,4 @@
+import 'package:bebes/app/modules/login/controllers/auth_controller_controller.dart';
 import 'package:bebes/app/modules/settings/controllers/settings_controller.dart';
 import 'package:get/get.dart';
 
@@ -10,5 +11,6 @@ class HomeBinding extends Bindings {
       () => HomeController(),
     );
     Get.lazyPut<SettingsController>(() => SettingsController());
+    Get.lazyPut<AuthController>(() => AuthController());
   }
 }

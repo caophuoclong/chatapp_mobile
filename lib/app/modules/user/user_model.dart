@@ -8,7 +8,7 @@ class User {
   String? birthday;
   int? lastOnline;
   String? gender;
-  String? active;
+  bool? active;
 
   User(
       {this.sId,

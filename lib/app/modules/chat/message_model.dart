@@ -1,3 +1,6 @@
+import 'package:bebes/app/modules/conversations/conversation_model.dart';
+import 'package:bebes/app/modules/user/user_model.dart';
+
 class Message {
   String? sId;
   String? content;
@@ -7,7 +10,8 @@ class Message {
   String? type;
   int? scale;
   bool? isRecall;
-  String? sender;
+  User? sender;
+  Conversation? destination;
 
   Message(
       {this.sId,
@@ -18,7 +22,8 @@ class Message {
       this.type,
       this.scale,
       this.isRecall,
-      this.sender});
+      this.sender,
+      this.destination});
 
   Message.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -30,6 +35,7 @@ class Message {
     scale = json['scale'];
     isRecall = json['isRecall'];
     sender = json['sender'];
+    destination = json["destination"];
   }
 
   Map<String, dynamic> toJson() {
@@ -43,6 +49,7 @@ class Message {
     data['scale'] = scale;
     data['isRecall'] = isRecall;
     data['sender'] = sender;
+    data["destination"] = destination;
     return data;
   }
 }

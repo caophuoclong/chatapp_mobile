@@ -1,26 +1,32 @@
 import 'dart:math';
 
 import 'package:bebes/app/constants/app_theme.dart';
+import 'package:bebes/app/constants/shared_key.dart';
+import 'package:bebes/app/modules/chat/message_model.dart';
 import 'package:bebes/app/modules/settings/controllers/settings_controller.dart';
+import 'package:bebes/app/modules/user/controllers/user_controller.dart';
+import 'package:bebes/app/utils/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swipe_detector/flutter_swipe_detector.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../controllers/chat_controller.dart';
 
-class ChatView extends GetView<ChatController> {
+class ChatView extends GetView {
   ChatView({Key? key}) : super(key: key);
   final args = Get.arguments;
   ScrollController _scrollController = ScrollController();
   SettingsController sc = Get.find();
-  _message(String content, String messageType, String avatarUrl, bool mine,
-      double width) {
-    if (mine) {
+  UserController uc = Get.find();
+  Future<Widget> _message(Message m, double width) async {
+    final myId = uc.user.sId;
+    if (m.sender!.sId == myId) {
       return ListTile(
-        // trailing:
-        //     CircleAvatar(radius: 18, backgroundImage: NetworkImage(avatarUrl)),
+        // trailing: Utils.customCircleImage(m.sender!.avatarUrl ?? "nothing",
+        //     radius: 18),
         title: Wrap(
           alignment: WrapAlignment.end,
           children: [
@@ -32,7 +38,7 @@ class ChatView extends GetView<ChatController> {
                       ? MyTheme.lightMyMessageBackground
                       : MyTheme.darkMyMessageBackground,
                   borderRadius: const BorderRadius.all(Radius.circular(12))),
-              child: Text(content,
+              child: Text(m.content!,
                   style: TextStyle(
                       fontWeight: FontWeight.w500,
                       color: sc.isLightTheme.value
@@ -44,8 +50,8 @@ class ChatView extends GetView<ChatController> {
       );
     } else {
       return ListTile(
-        // leading:
-        //     CircleAvatar(radius: 18, backgroundImage: NetworkImage(avatarUrl)),
+        // trailing: Utils.customCircleImage(m.sender!.avatarUrl ?? "nothing",
+        //     radius: 18),
         title: Wrap(
           children: [
             Container(
@@ -56,7 +62,7 @@ class ChatView extends GetView<ChatController> {
                       ? MyTheme.lightOrderMessageBackground
                       : MyTheme.darkOrderMessageBackground,
                   borderRadius: const BorderRadius.all(Radius.circular(12))),
-              child: Text(content,
+              child: Text(m.content!,
                   style: TextStyle(
                       fontWeight: FontWeight.w500,
                       color: sc.isLightTheme.value
@@ -71,7 +77,7 @@ class ChatView extends GetView<ChatController> {
 
   _appBar() {
     return AppBar(
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: true,
       // shape: Border(
       //     bottom: BorderSide(
       //         color: MyTheme.getAppBarColor(
@@ -83,16 +89,13 @@ class ChatView extends GetView<ChatController> {
       foregroundColor:
           MyTheme.getAppBarColor(sc.isLightTheme.value)["foregroundColor"],
       title: Row(children: [
-        const CircleAvatar(
-          radius: 20,
-          backgroundImage: NetworkImage("https://picsum.photos/200"),
-        ),
+        Utils.customCircleImage(args["avatarUrl"], radius: 20),
         const SizedBox(width: 10),
         Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              "John Doe",
+              args["name"],
               style: TextStyle(
                   fontWeight: FontWeight.w700,
                   color: MyTheme.getAppBarColor(
@@ -144,8 +147,9 @@ class ChatView extends GetView<ChatController> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(ChatController(args["_id"]));
+
     final width = MediaQuery.of(context).size.width;
-    final messages = controller.messages;
     final TextEditingController _messageInputController =
         TextEditingController();
     final focusNode = FocusNode();
@@ -154,8 +158,9 @@ class ChatView extends GetView<ChatController> {
         backgroundColor: sc.isLightTheme.value
             ? MyTheme.lightScreenMessage
             : MyTheme.darkPrimaryColor,
-        body: SwipeDetector(
-          child: GestureDetector(
+        body: controller.obx((state) {
+          List<Message> messages = state;
+          return GestureDetector(
             onTap: () {
               focusNode.unfocus();
             },
@@ -165,16 +170,14 @@ class ChatView extends GetView<ChatController> {
                 Obx(
                   () => Expanded(
                       child: ListView.builder(
-                    controller: _scrollController,
-                    reverse: true,
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) => _message(
-                        messages[messages.length - 1 - index]["content"],
-                        messages[messages.length - 1 - index]["type"],
-                        "https://picsum.photos/200",
-                        index % 2 == 0 ? true : false,
-                        width),
-                  )),
+                          controller: _scrollController,
+                          reverse: true,
+                          itemCount: state.length,
+                          itemBuilder: (context, index) => FutureBuilder(
+                              future: _message(messages[index], width),
+                              builder: (context, snapshot) {
+                                return snapshot.data ?? Text("Asdf");
+                              }))),
                 ),
                 const SizedBox(height: 2),
                 Container(
@@ -238,8 +241,7 @@ class ChatView extends GetView<ChatController> {
                     ]))
               ],
             ),
-          ),
-          onSwipeRight: (offset) => Navigator.pop(context),
-        ));
+          );
+        }));
   }
 }

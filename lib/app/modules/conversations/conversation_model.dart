@@ -1,19 +1,21 @@
+import 'package:bebes/app/modules/user/user_model.dart';
+
 class Conversation {
   String? sId;
   String? name;
   String? type;
-  bool? visible;
+  String? visible;
   String? avatarUrl;
   bool? isBlocked;
   bool? isDeleted;
   String? deletedAt;
   String? createdAt;
   String? updatedAt;
-  dynamic owner;
+  Map<String, dynamic>? owner;
   dynamic blockBy;
-  String? lastMessage;
-  String? friendShip;
-  List<String>? participants;
+  Map<String, dynamic>? lastMessage;
+  Map<String, dynamic>? friendShip;
+  List<User>? members;
 
   Conversation(
       {this.sId,
@@ -30,24 +32,27 @@ class Conversation {
       this.blockBy,
       this.lastMessage,
       this.friendShip,
-      this.participants});
+      this.members});
 
   Conversation.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
-    name = json['name'];
-    type = json['type'];
-    visible = json['visible'];
-    avatarUrl = json['avatarUrl'];
-    isBlocked = json['isBlocked'];
-    isDeleted = json['isDeleted'];
-    deletedAt = json['deletedAt'];
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
-    owner = json['owner'];
+    sId = json['_id'] ?? "null";
+    name = json['name'] ?? "null";
+    type = json['type'] ?? "null";
+    visible = json['visible'] ?? "null";
+    avatarUrl = json['avatarUrl'] ?? "null";
+    isBlocked = json['isBlocked'] ?? false;
+    isDeleted = json['isDeleted'] ?? false;
+    deletedAt = json['deletedAt'] ?? "null";
+    createdAt = json['createdAt'] ?? "null";
+    updatedAt = json['updatedAt'] ?? "null";
+    owner = json['owner'].runtimeType != Map ? {} : json['owner'];
     blockBy = json['blockBy'];
-    lastMessage = json['lastMessage'];
-    friendShip = json['friendShip'];
-    participants = json['participants'].cast<String>();
+    lastMessage =
+        json['lastMessage'].runtimeType != Map ? {} : json['lastMessage'];
+    friendShip =
+        json['friendShip'].runtimeType != Map ? {} : json['friendShip'];
+    members =
+        json['members'].runtimeType != (List<User>) ? [] : json['members'];
   }
 
   Map<String, dynamic> toJson() {
@@ -66,7 +71,7 @@ class Conversation {
     data['blockBy'] = blockBy;
     data['lastMessage'] = lastMessage;
     data['friendShip'] = friendShip;
-    data['participants'] = participants;
+    data['members'] = members;
     return data;
   }
 }

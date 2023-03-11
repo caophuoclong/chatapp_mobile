@@ -27,6 +27,8 @@ dependencies:
   cookie_jar: any
   connectivity_plus: any
   graphql_flutter: any
+  emoji_picker_flutter: any
+  flutter_keyboard_visibility: any
 
 dev_dependencies:
   flutter_lints: 2.0.1

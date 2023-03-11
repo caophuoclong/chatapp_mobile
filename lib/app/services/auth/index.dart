@@ -10,13 +10,12 @@ class AuthService {
       SharedPreferences.getInstance();
   Future<Auth?> getAuth() async {
     String? authKey = (await _sharedPreferences).getString(SharedKey.authKey);
+
     // await saveAuth(Auth.fromJson({'userId': 'long', 'token': '11skkdkfjsjs'}));
     if (authKey != null) {
-      auth = Auth.fromJson(json.decode(authKey));
-      return auth;
-    } else {
-      return null;
+      return Auth.fromJson(json.decode(authKey));
     }
+    return null;
   }
 
   Future<void> saveAuth(Map<String, dynamic> objectToken) async {

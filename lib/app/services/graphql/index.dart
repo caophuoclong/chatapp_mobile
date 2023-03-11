@@ -22,11 +22,11 @@ class GraphAPIClient {
     try {
       final HttpLink httpLink = HttpLink("${Env.serverUrl}/graphql");
       final AuthLink authLink = AuthLink(getToken: () async {
-        final SharedPreferences _ = await SharedPreferences.getInstance();
         final auth = await _authService.getAuth();
-        print("auth $auth");
-        final token = auth!.toJson()["token"];
-        return "Bearer $token";
+        if (auth != null) {
+          final token = auth.toJson()["token"];
+          return "Bearer $token";
+        }
       });
       final Link link = authLink.concat(httpLink);
       // print("link ${link.toString()}");
@@ -43,12 +43,15 @@ class GraphAPIClient {
       final cj =
           PersistCookieJar(storage: FileStorage("$appDocPath/./cookies/"));
       final cookies = await cj.loadForRequest(Uri.parse(Env.serverUrl));
-      // dio.options.baseUrl = "${Env.serverUrl}/api";
       final response = await _.query(QueryOptions(
           fetchPolicy: FetchPolicy.networkOnly,
           document: gql(refreshTokenQuery),
           variables: {"refreshToken": cookies[0].toString()}));
       final objectToken = response.data!["refreshtoken"];
+      if (objectToken == null) {
+        ac.logOut();
+        return;
+      }
       objectToken.removeWhere((key, value) => key == "__typename");
       await _authService.saveAuth(objectToken);
     } catch (error) {
